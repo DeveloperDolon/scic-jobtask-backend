@@ -92,6 +92,24 @@ async function run() {
         }
     })
 
+    app.get("/tasks", logger, verifyToken, async (req, res) => {
+        try {   
+            const email = req?.query?.email;
+            const query = {userEmail: email};
+
+            if(req.user.email !== email) {
+                return res.status(404).send({message: "Forbidden access."})
+            }
+
+            const result = await taskCollection.find(query).toArray();
+
+            res.send(result);
+
+        } catch (err) {
+            console.log(err.message);
+        }
+    })
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
