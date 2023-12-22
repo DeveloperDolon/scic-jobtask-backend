@@ -58,6 +58,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
+    const taskCollection = client.db("ScicJobTaskDB").collection("taskCollection");
 
     app.post("/jwt", logger, async (req, res) => {
         try{
@@ -66,7 +67,7 @@ async function run() {
   
           res.cookie('token', token, {
             httpOnly: true,
-            secure: false,
+            secure: true,
             sameSite: 'none'
 
             // secure: process.env.NODE_ENV === 'production', 
@@ -77,19 +78,33 @@ async function run() {
         }
     });
 
+    app.post("/tasks", async (req, res) => {
+        try {
+
+            const taskData = req?.body;
+            
+            const result = await taskCollection.insertOne(taskData);
+            
+            res.send(result);
+
+        } catch (err) {
+            console.log(err.message);
+        }
+    })
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("Welcome to assignment 11 backend😬!!");
+  res.send("Welcome Scic job task backend😬!!");
 });
 
 app.listen(port, () => {
